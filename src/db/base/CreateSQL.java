@@ -226,6 +226,38 @@ public class CreateSQL {
 	}
 
 	/**
+	 * WHERE句の部分　指定したカラム名と指定した値を指定した演算で条件付け
+	 * @param culm　CalamName.判定するカラム名
+	 * @param operater　条件の演算子
+	 * @param value 条件の値
+	 * @return this
+	 */
+	public CreateSQL Where(String culm,String operater,Object value)
+	{
+		StringBuilder sb = new StringBuilder();
+		sb.append(" WHERE ").append(culm).append(" ").append(operater).append(" ");
+		WherePart = sb.toString();
+
+		//判断用
+		Class<? extends Object> C = value.getClass();
+		String s = "";
+		Date d = new Date(0);
+		//値がString型もしくはデート型の場合
+		if(C == s.getClass() || C == d.getClass() )
+		{
+			WherePart += "'" + value + "'";
+		}
+		else
+		{
+			WherePart += value;
+		}
+
+		WhereFlg = true;
+
+		return this;
+	}
+
+	/**
 	 * インサート文のやつ　入れたいテーブルと入れるカラム名を指定
 	 * @param t TableList.テーブル名
 	 * @param clum テーブル名Colums.カラム名
@@ -502,6 +534,7 @@ public class CreateSQL {
 	{
 		setValueList = new ArrayList<Object>();
 		for(Object value: ValueList){
+			System.out.println("CreateSQL505本当の原因?:"+value);
 			setValueList.add(value);
 		}
 
@@ -600,7 +633,9 @@ public class CreateSQL {
 
 		//UpdateのとこUpdateとセットまとめる
 		int count = 0;
-		sb = updatePartSetting(sb);
+		if(UpdateFlg){
+			sb = updatePartSetting(sb);
+		}
 
 		//Where
 		if(WhereFlg)
@@ -625,21 +660,32 @@ public class CreateSQL {
 		StringBuilder upsb = sb;
 		//UpdateのとこUpdateとセットまとめる
 		int count = 0;
+		//デバッグ用
+		for(Object obj :setValueList){
+			System.out.println("valuelist中身"+obj);
+		}
+		for(String st :stringCalamList){
+			System.out.println("カラムリスト中身"+st);
+		}
 		if (UpdateFlg)
 		{
 			upsb.append(UpdatePart);
 			if(useStringCulumListFlg)
 			{
 				for (String c : stringCalamList)
+				//for(int i= 0;i < setValueList.size();i++)
 				{
+					//String c = stringCalamList.get(i);
+					System.out.println("これには:"+c);
 					upsb.append(c).append(" = ");
 					//判断用
-					System.out.println(setValueList.size() + "size");
-					System.out.println(count + "count");
-
+					System.out.println("CreateSQL640これが原因?:"+setValueList);
 					Object value = setValueList.get(count);
-					System.out.println(value);
-					Class C = value.getClass();
+
+					Class C = null;
+					if(value != null){
+						C = value.getClass();
+					}
 
 					String s = "";
 					Date d = new Date(0);

@@ -82,6 +82,7 @@ public class SetResToBean<T> {
 					{
 						try {
 							constructor = clazz.getConstructor(ServletContext.class);
+							System.out.println("コンテキスト有でインスタンス化したぜ");
 						} catch (SecurityException e1) {
 							System.out.println("SecurityExceptionコンストラクター取得できません");
 							e1.printStackTrace();
@@ -100,10 +101,8 @@ public class SetResToBean<T> {
 						}
 					}
 				} catch (InstantiationException e) {
-					// TODO 自動生成された catch ブロック
 					e.printStackTrace();
 				} catch (IllegalAccessException e) {
-					// TODO 自動生成された catch ブロック
 					e.printStackTrace();
 				}
 
@@ -120,7 +119,6 @@ public class SetResToBean<T> {
 					//型ごとの取得関数でデータ取得
 					if (typeName == "INT")
 					{
-						System.out.println("field" + pFileld);
 						bean = (T) this.setValuetoBean(bean, pFileld, result.getInt(fName));
 					}
 					if(typeName == "NUMBER")
@@ -144,7 +142,6 @@ public class SetResToBean<T> {
 				list.add((BaseBeans)bean);
 			}
 		} catch (SQLException e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
 
@@ -166,21 +163,15 @@ public class SetResToBean<T> {
 		try {
 			//Beansに値を入れる
 			//setメソッドを取得して値を入れる
-			//TODO テスト消す
-			System.out.println(o);
-			System.out.println("field" + field);
-			System.out.println(value);
+
 			cm.getBeanSetter(o, field, int.class).invoke(o, value);
 		} catch (InvocationTargetException e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 			System.out.println("DataAccess.setValuetoBean そもそものメソッドが例外してるで");
 		} catch (IllegalArgumentException e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 			System.out.println("DataAccess.setValuetoBean なんかおかしいで");
 		} catch (IllegalAccessException e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 			System.out.println("DataAccess.setValuetoBean そのメソッドにはアクセスできない");
 		}
@@ -202,15 +193,12 @@ public class SetResToBean<T> {
 			//setメソッドを取得して値を入れる
 			cm.getBeanSetter(o, field, String.class).invoke(o, value);
 		} catch (InvocationTargetException e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 			System.out.println("DataAccess.setValuetoBean そもそものメソッドが例外してるで");
 		} catch (IllegalArgumentException e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 			System.out.println("DataAccess.setValuetoBean なんかおかしいで");
 		} catch (IllegalAccessException e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 			System.out.println("DataAccess.setValuetoBean そのメソッドにはアクセスできない");
 		}

@@ -42,7 +42,6 @@ public class DataAccess extends BaseTableManager {
 	/**
 	 *データベースアクセスクラス
 	 *コンストラクタでアクセスしちゃう
-	 *TODO Dbプロパティのパスが定数　サーブレットコンテキストに対応
 	 */
 	public DataAccess()
 	{
@@ -55,7 +54,7 @@ public class DataAccess extends BaseTableManager {
 		//ここも外部ファイルにしたい感。いや、規約にしちゃおう
 		//TODOここサーブレットとコンソールで違う
 //		String proppass = "/kadai08/WebContent/WEB-INF/Properties/DB.properties";
-		String proppass = file.getAbsolutePath()+"./sasoon_frame_work/WebContent/META-INF/Properties/DB.properties";
+		String proppass = file.getAbsolutePath()+"./kadai08_b_31/WebContent/WEB-INF/Properties/DB.properties";
 		LoadProperty loadprop = new LoadProperty();
 		loadprop.load(proppass);
 
@@ -93,13 +92,10 @@ public class DataAccess extends BaseTableManager {
 				javax.sql.DataSource ds = (javax.sql.DataSource)ic.lookup("java:comp/env/jdbc/kadai08");
 				try {
 					connection = ds.getConnection();
-					System.out.println("JNDIせつぞくうううう");
 				} catch (SQLException e) {
-					// TODO 自動生成された catch ブロック
 					e.printStackTrace();
 				}
 			} catch (NamingException e) {
-				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
 			}
 		}
@@ -120,8 +116,7 @@ public class DataAccess extends BaseTableManager {
 		//Servletの時
 		// プロパティファイルのパスを取得する
         ServletContext context = contextParam;
-        System.out.println("->" + context.getRealPath("./META-INF/Properties/DB.properties"));
-        String proppass = context.getRealPath("./META-INF/Properties/DB.properties");
+        String proppass = context.getRealPath("WEB-INF/Properties/DB.properties");
 
 		LoadProperty loadprop = new LoadProperty();
 		loadprop.load(proppass);
@@ -160,13 +155,10 @@ public class DataAccess extends BaseTableManager {
 				javax.sql.DataSource ds = (javax.sql.DataSource)ic.lookup("java:comp/env/jdbc/kadai08");
 				try {
 					connection = ds.getConnection();
-					System.out.println("JNDIせつぞくうううう");
 				} catch (SQLException e) {
-					// TODO 自動生成された catch ブロック
 					e.printStackTrace();
 				}
 			} catch (NamingException e) {
-				// TODO 自動生成された catch ブロック
 				e.printStackTrace();
 			}
 		}
@@ -194,13 +186,11 @@ public class DataAccess extends BaseTableManager {
 		try {
 			connection.commit();
 		} catch (SQLException e) {
-			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 			System.out.println("コミットできませんでした。ロールバック処理に移行します");
 			try {
 				connection.rollback();
 			} catch (SQLException e1) {
-				// TODO 自動生成された catch ブロック
 				e1.printStackTrace();
 				System.out.println("ロールバックできないとかお手上げですわ");
 				throw new RollbackException();
@@ -209,7 +199,6 @@ public class DataAccess extends BaseTableManager {
 		return resultSet;
 	}
 
-	//TODO 確認ひっす
 	/**
 	 *
 	 * インサート、アップデート、デリート用
@@ -229,13 +218,11 @@ public class DataAccess extends BaseTableManager {
 		try {
 			connection.commit();
 		} catch (SQLException e) {
-			// TODO 自動生成された catch ブロック
 			System.out.println("コミットできず、ロールバック処理に移行します");
 			e.printStackTrace();
 			try {
 				connection.rollback();
 			} catch (SQLException e1) {
-				// TODO 自動生成された catch ブロック
 				e1.printStackTrace();
 				System.out.println("ロールバックできないとかお手上げですわ");
 				throw new RollbackException();
@@ -254,38 +241,5 @@ public class DataAccess extends BaseTableManager {
 		connection.close();
 	}
 
-	/**
-	 * テスト用データ
-	 */
-	public void debug()
-	{
-		System.out.println(url);
-		System.out.println(driver);
-		System.out.println(user);
-		System.out.println(pass);
-	}
-
-	//TODO これ今イラン konngootameninokou
-	//	//リザルトセットの列の型からget関数を選択する
-	//	public Method choseGetResult(String typeName,String calamName) throws ChoseGetResultSecException
-	//	{
-	//		Method m = null;
-	//
-	//		try {
-	//			if (typeName == "INT")
-	//			{
-	//				ResultSet.class.getDeclaredMethod("getInt", int.class);
-	//			}
-	//		} catch (SecurityException e) {
-	//			// TODO 自動生成された catch ブロック
-	//			e.printStackTrace();
-	//			throw new ChoseGetResultSecException();
-	//		} catch (NoSuchMethodException e) {
-	//			// TODO 自動生成された catch ブロック
-	//			e.printStackTrace();
-	//		}
-	//
-	//		return m;
-	//	}
 
 }

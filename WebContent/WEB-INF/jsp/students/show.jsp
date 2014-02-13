@@ -11,11 +11,10 @@
 </head>
 <body>
 
-	<h1>一覧</h1>
+	<h1>個人</h1>
 
 	<table>
 		<tr><th>ID</th><th>クラス記号</th><th>学籍番号</th><th>名前</th><th>変更</th><th>削除</th></tr>
-		<c:forEach var="student" items="${studentList}">
 			<tr>
 			<td>${student.id}</td>
 			<td>${student.className}</td>
@@ -24,7 +23,6 @@
 			<td><a href="update?id=${student.id}">変更</a></td>
 			<td><a href="delete?id=${student.id}">削除</a></td>
 			</tr>
-		</c:forEach>
 	</table>
 </body>
 </html>

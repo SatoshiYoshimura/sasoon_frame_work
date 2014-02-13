@@ -36,7 +36,6 @@ public class UseUpdate extends UseSQL {
 		try {
 			resultRow = this.dataAccess.NonQuerySQL(sql);
 		} catch (RollbackException e) {
-			// TODO 自動生成された catch ブロック
 			System.out.println("ロールバックエラー");
 			e.printStackTrace();
 		}

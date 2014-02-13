@@ -64,7 +64,6 @@ public class UseSelect<T> extends UseSQL {
 		{
 			sr = new SetResToBean<T>();
 		}
-		System.out.println("ressetは"+resultSet);
 		resultList = sr.set(resultSet, clazz);
 		try {
 			resultSet.close();

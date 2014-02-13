@@ -4,6 +4,7 @@
 package edit.string;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import MyArrayList.IntArrayList;
@@ -20,6 +21,166 @@ public class StringManager {
 	 */
 	public StringManager() {
 
+	}
+
+	/**
+	 * ストリングを指定文字で分割する
+	 * @param query　クエリストリングが主
+	 * @param indexString &or=が主
+	 * @return
+	 */
+	public String[] queryToArray(String query,String indexString){
+		String str = query;
+		String indexStr = indexString;
+		String[] strAry = str.split(indexStr);
+	    return strAry;
+	}
+
+	/**
+	 * クエリ文字列をハッシュマップにする
+	 * @param String query
+	 * @return
+	 */
+	public ArrayList<HashMap> queryToHashList(String query){
+		ArrayList<HashMap> queryList = new ArrayList<HashMap>();
+		String queryStr = query;
+		//まずは&で区切る
+		String[] queryArray = this.queryToArray(queryStr, "&");
+
+		//この配列をそれぞれ分割してアレイリストにする
+		ArrayList<String[]> strArL = this.splitArray(queryArray, "=");
+
+		//分割されたリスト内のString[]をハッシュマップにしてリストに格納
+		queryList = this.stringAryToHashAry(strArL);
+
+		return queryList;
+	}
+
+	/***
+	 * String配列リストをHashMapリストに変換
+	 * 注意String[]が１対１の中身でないとエラーが出る
+	 * 主な使い方はクエリストリングの分割
+	 * @param strAryList
+	 * @return ハッシュマップリスト
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public ArrayList<HashMap> stringAryToHashAry(ArrayList<String[]> strAryList){
+		ArrayList<HashMap> hList = new ArrayList<HashMap>();
+		ArrayList<String[]> strArrayList = strAryList;
+		for (String[] se: strArrayList){
+			HashMap hs = new HashMap();
+			hs.put(se[0], se[1]);
+			hList.add(hs);
+		}
+
+		return hList;
+	}
+
+	/**
+	 * 文字列がnullか空でないか判定nullor空でなかった場合true
+	 * @param value String 文字列
+	 * @return boolean
+	 */
+	public boolean allRightNullorPlane(String value){
+		if ( value == null || value.length() == 0 ){
+			return false;
+		}else{
+	        return true;
+		}
+	}
+
+	/**
+	 * 指定した文字で配列内の文字列を分割してリストに入れる
+	 * 主な使いかた:&で分割された後の配列を=で分割してリストに入れて返す
+	 * @param queryArray 元の配列
+	 * @param spStr 分割区切り文字列
+	 * @return
+	 */
+	public ArrayList<String[]> splitArray(String[] queryArray,String spStr){
+		ArrayList<String[]> strArray = new ArrayList<String[]>();
+		String[] bigArray = queryArray;
+		String splitStr = spStr;
+		for (String str: bigArray){
+			strArray.add(this.queryToArray(str, splitStr));
+		}
+
+		return strArray;
+	}
+
+	/**
+	 * 指定した文字以降の文字列を抜き取る
+	 * @param subject
+	 * @param ch
+	 * @return
+	 */
+	public String getAfterindex(String subject,char ch){
+		String str = subject;
+		int index = str.indexOf(ch);
+		String newStr = str.substring(index+1);
+		return newStr;
+	}
+
+	/**
+	 * 指定した文字以前の文字列を抜き折る
+	 * @param subject
+	 * @param indStr
+	 * @return
+	 */
+	public String getBeforeIndex(String subject,char indCh){
+		String str = subject;
+		char ch = indCh;
+		int index = str.indexOf(ch);
+		String newStr = str.substring(0,index);
+		return newStr;
+	}
+
+
+	public String getControllerName(String tmpUrl){
+		String cName = "";
+		String str = tmpUrl;
+		StringBuilder Sb = new StringBuilder(str);
+		//一文字消して、/より前ゲット
+		Sb.delete(0,1);
+		str = Sb.toString();
+		// 指定した文字より後ろの文字取り出し
+	    int index = str.indexOf("/");
+	    cName = str.substring(0,index);
+
+	    return cName;
+	}
+
+	/***
+	 * tmpUriからアクション名を抜き取る
+	 */
+	public String getActionName(String tmpUri){
+		String actionN = "";
+		String str = tmpUri;
+		StringBuilder Sb = new StringBuilder(str);
+		Sb.delete(0, 1);
+		actionN = Sb.toString();
+		int index = actionN.indexOf("/");
+		actionN = actionN.substring(index+1);
+
+		return actionN;
+	}
+
+	/***
+	 * URLからプロジェクト名を抜き取る
+	 * 第一引数:URL 第二引数:プロジェクト名
+	 * 戻値:String
+	 * @param URL
+	 * @param ProjectName
+	 * @return
+	 */
+	public String deleteProperty(String URL,String Property)
+	{
+		String newUrl = "";
+	 	String pName = Property;
+	 	StringBuilder Sb = new StringBuilder(URL);
+	 	Sb.delete(0, pName.length() + 1);
+	 	newUrl = Sb.toString();
+
+		return newUrl;
 	}
 
 	/**

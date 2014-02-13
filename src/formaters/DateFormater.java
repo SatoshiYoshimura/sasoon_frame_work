@@ -20,7 +20,6 @@ public class DateFormater {
 
 		java.sql.Date sqlDate = new java.sql.Date(date.getTime());
 
-		System.out.println("sql" + sqlDate);
 
 		return sqlDate;
 	}
@@ -32,7 +31,6 @@ public class DateFormater {
 	 */
 	public java.util.Date stringToUtilDate(String string_date)
 	{
-		System.out.println("string" + string_date);
 
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-mm-dd");
 		//TODO utildateへの変換 今はHTML5のdateタグを使ってるからうまく言ってるだけ
@@ -48,7 +46,6 @@ public class DateFormater {
 			System.out.println("文字をutildateに変換できない");
 		}
 
-		System.out.println( "util" + date);
 
 		return date;
 

@@ -1,7 +1,4 @@
-/**
- *プロパティ読み込みクラス
- */
-package db.base;
+package controller;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -9,22 +6,22 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
-/**
- * @author OWNER
+
+/***
  *
+ * @author OWNER
+ *	プロジェクト固有の設定をロード
+ * TODO DBの方と抽象か
  */
-public class LoadProperty {
+public class LoadProjectProp {
 
 	/**
-	 * これはエンティティ格納用クラス
+	 * これはプロパティ格納用クラス
 	 */
-	DBProp propEntity;
+	ProjectProp propEntity;
 
-	/**
-	 *どうでもよい
-	 */
-	public LoadProperty() {
-		propEntity = new DBProp();
+	public LoadProjectProp() {
+		propEntity = new ProjectProp();
 	}
 
 	/**
@@ -34,7 +31,7 @@ public class LoadProperty {
 	public void load(String pass)
 	{
 		// プロパティの読み込み
-		  Properties prop = new Properties();
+		Properties prop = new Properties();
 		  try {
 			prop.load(new InputStreamReader(new FileInputStream(pass) , "UTF-8"));
 //			prop.load((new FileInputStream(pass)));
@@ -48,18 +45,16 @@ public class LoadProperty {
 			System.out.println("IOおかしいで");
 		}
 
-		  //格納開始
-		  propEntity.setUrl(prop.getProperty("db.url"));
-		  propEntity.setDriver(prop.getProperty("db.driver"));
-		  propEntity.setUser(prop.getProperty("db.user"));
-		  propEntity.setPass(prop.getProperty("db.pass"));
-		  propEntity.setJndiFlag(Integer.parseInt(prop.getProperty("db.jndiFlag")));
+		//格納開始
+		propEntity.setName(prop.getProperty("project.name"));
+		propEntity.setServletPath(prop.getProperty("project.servletPath"));
 	}
+
 
 	/**
 	 *プロパティ読み込んだ後、エンティティクラスを返す
 	 */
-	public DBProp GiveDBprop()
+	public ProjectProp giveProjectProp()
 	{
 		return propEntity;
 	}

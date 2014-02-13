@@ -34,7 +34,6 @@ public class CalamManager {
 		try
 		{
 			//フィールド取得
-			System.out.println("beanは" + o);
 			field = o.getClass().getDeclaredField(stringM.calamNametoBeanField(calamName));
 		} catch (SecurityException e1)
 		{
@@ -60,7 +59,6 @@ public class CalamManager {
 	public Method getBeanSetter(Object o,Field field,Class<?> type)
 	{
 		Method m = null;
-		System.out.println( stringM.FirstUpper(field.getName()));
 		try {
 			m = o.getClass().getDeclaredMethod("set" + stringM.FirstUpper(field.getName()) ,type);
 			System.out.println(m);

@@ -3,11 +3,14 @@
  */
 package calam;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.ServletContext;
 
+import calam.error.IdNullException;
 import db.base.CreateSQL;
 import db.base.UseDelete;
 import db.base.UseInsert;
@@ -99,14 +102,7 @@ public class BaseBeans {
 	//TODO findAll でbasebean basebeanでDAO ループ
 	public  List findAll()
 	{
-		if(contextParam != null)
-		{
-			selectObj = new UseSelect<BaseBeans>(contextParam);
-		}
-		else
-		{
-			selectObj = new UseSelect<BaseBeans>();
-		}
+		this.newSelectObj();
 		List<BaseBeans> BeanArray = new ArrayList<BaseBeans>();
 		String sql = createSQL.Select("*").From(beanClassName).GenerateAlltoString();
 		try {
@@ -125,9 +121,89 @@ public class BaseBeans {
 		return BeanArray;
 	}
 
-	public void delete()
-	{
-		if(contextParam.equals(null))
+	/***
+	 * SQLを手打ち入力して自由にインサート
+	 * @param sql
+	 */
+	public void freeInsert(String sql){
+
+		this.newInsertObj();
+		String thisSql = sql;
+		insertObj.DoInsert(thisSql);
+	}
+
+	/**
+	 * インサートオブジェクトインスタンス化
+	 */
+	private void newInsertObj(){
+		if(contextParam != null)
+		{
+			insertObj = new UseInsert(contextParam);
+		}
+		else
+		{
+			insertObj = new UseInsert();
+		}
+	}
+
+	/**
+	 * 自由にアップデート文を行う
+	 * 戻り値はない
+	 * @param sql
+	 */
+	public void freeUpdate(String sql){
+		this.newUpdateObj();
+		String thisSql = sql;
+
+		updateObj.DoUpdate(thisSql);
+
+	}
+
+
+	/**
+	 * Select文を自由に実行するクラス
+	 * @param sql
+	 * @return List<BaseBeans>
+	 */
+	public List<BaseBeans> freeSelect(String sql){
+
+		this.newSelectObj();
+
+		List<BaseBeans> BeanArray = new ArrayList<BaseBeans>();
+		String thisSql = sql;
+		try {
+			clazz = Class.forName(beanClassNameInPackage);
+		} catch (ClassNotFoundException e1) {
+			System.out.println("findAllクラスないよ");
+			e1.printStackTrace();
+		}
+
+		try {
+			BeanArray =  selectObj.DoSelect(thisSql, clazz);
+		} catch (DBAccessException e) {
+			System.out.println("データベースアクセスエラー:executeSelect");
+			e.printStackTrace();
+		}
+
+		return BeanArray;
+	}
+
+	/**
+	 * 自由にデリート文を実行する
+	 * @param sql
+	 * 戻り値なし
+	 */
+	public void freeDelete(String sql){
+		this.newDeleteObj();
+		String thisSql = sql;
+		deleteObj.doDelete(thisSql);
+	}
+
+	/**
+	 * デリートオブジェクトインスタンス化
+	 */
+	private void newDeleteObj(){
+		if(contextParam == null)
 		{
 			deleteObj = new UseDelete();
 		}
@@ -135,9 +211,23 @@ public class BaseBeans {
 		{
 			deleteObj = new UseDelete(contextParam);
 		}
+	}
+
+	/**
+	 * デリート実行
+	 * @throws IdNullException
+	 */
+	public void delete() throws IdNullException
+	{
+		int id = 0;
+		id = this.getId();
+
+		if(id == 0){
+			throw new IdNullException();
+		}
+		this.newDeleteObj();
 		String sql = "";
 		sql = createSQL.Delete().From(beanClassName).Where(BaseColumns.id, "=", this.getId()).GenerateAlltoString();
-		System.out.println(sql);
 		deleteObj.doDelete(sql);
 	}
 
@@ -147,7 +237,6 @@ public class BaseBeans {
 
 		for (Field field : beans.getClass().getDeclaredFields())
 		{
-			System.out.println("->[" +field.getName() + "]");
 			boolean accessible = field.isAccessible();
 			try {
 			        field.setAccessible(true);
@@ -161,7 +250,6 @@ public class BaseBeans {
 						System.out.println("フィールドにアクセスできません");
 						e.printStackTrace();
 					}
-					System.out.println("-->[" + value + "]");
 					valueList.add(value);
 				}
 			finally {
@@ -171,6 +259,7 @@ public class BaseBeans {
 
 		return valueList;
 	}
+
 
 	/***
 	 * フィールド名をString型のリストにして返す
@@ -183,7 +272,7 @@ public class BaseBeans {
 		Field[] fieldArray;
 		fieldArray = bean.getClass().getDeclaredFields();
 
-//まずは文字列も対応させる
+		//まずは文字列も対応させる
 		for (Field field : fieldArray)
 		{
 			beanFieldList.add(field.toGenericString());
@@ -202,41 +291,172 @@ public class BaseBeans {
 		List <String> beanFieldNameList = new ArrayList<String>();
 		List <String> packFieldList = getBeanFields(bean);
 		for(String field: packFieldList){
-			System.out.println("->[" + field + "]");
 			beanFieldNameList.add(stringManager.pullClassName(field));
 		}
 
 		return beanFieldNameList;
 	}
 
+	/**
+	 * upDateオブジェクトを条件に基づきインスタンス化
+	 */
+	private void newUpdateObj(){
+		if(contextParam != null){
+			updateObj = new UseUpdate(contextParam);
+		}else{
+			updateObj = new UseUpdate();
+		}
+	}
+
+	private void newSelectObj(){
+		if(contextParam != null){
+			selectObj = new UseSelect<BaseBeans>(contextParam);
+		}else{
+			selectObj = new UseSelect<BaseBeans>();
+		}
+	}
+
+	/**
+	 * 簡易的にfind実装 Model = Model.find(id);
+	 * で返値に値が詰まってる
+	 * @param int id
+	 * @return 値の詰まったモデル
+	 */
+	public BaseBeans find(int idParam){
+		List<BaseBeans> BeanArray = new ArrayList<BaseBeans>();
+		String thisSql = createSQL.Select("*").From(beanClassName).Where("ID", "=", idParam).GenerateAlltoString();
+		try {
+			clazz = Class.forName(beanClassNameInPackage);
+		} catch (ClassNotFoundException e1) {
+			System.out.println("findクラスないよ");
+			e1.printStackTrace();
+		}
+
+		try {
+			BeanArray =  selectObj.DoSelect(thisSql, clazz);
+		} catch (DBAccessException e) {
+			System.out.println("データベースアクセスエラー:executeSelect");
+			e.printStackTrace();
+		}
+		BaseBeans thisBean = BeanArray.get(0);
+		return thisBean;
+	}
+
+	/**
+	 * 指定したフィールドのゲッター取得
+	 * @param fie
+	 * @return
+	 */
+	private Method getGetter(Field fie,Class<? extends BaseBeans> clazz){
+		Method getter = null;
+		Class thisClass = clazz;
+		try {
+			getter = thisClass.getMethod("get"+stringManager.FirstUpper(fie.getName()) , null);
+			Class fC = fie.getGenericType().getClass();
+		} catch (SecurityException e1) {
+			e1.printStackTrace();
+		} catch (NoSuchMethodException e1) {
+			e1.printStackTrace();
+		}
+
+		return getter;
+	}
+
+
+	/***
+	 * 指定したフィールドのセッター取得
+	 * @param fie
+	 * @param clazz
+	 * @return
+	 */
+	private Method getSetter(Field fie,Class<? extends BaseBeans> clazz){
+		Method setter = null;
+		try {
+			setter = clazz.getMethod("set"+stringManager.FirstUpper(fie.getName()) , (Class<?>)fie.getGenericType());
+		} catch (SecurityException e1) {
+			e1.printStackTrace();
+		} catch (NoSuchMethodException e1) {
+			e1.printStackTrace();
+		}
+
+		return setter;
+	}
+
+	/***
+	 * 指定したビーンズの指定したゲッターから値取得
+	 * @param bean
+	 * @param getter
+	 * @return
+	 */
+	private Object getGetterInvokeValue(BaseBeans bean,Method getter){
+		Object ret = null;
+		try {
+			ret = getter.invoke(bean, null);
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		}
+		return ret;
+	}
+
 	/***
 	 * update メソッド
-	 * 普通に引数でアップロードさせる
-	 * 引数
-	 * Beans : インスタンスかした自分 それ以外を入れると
 	 * ビーンズの状態でDB更新
-	 * 現在できていない、createSQLでアップデートが機能しないListから値がとれない
+	 * ビーンズにIDが指定されていないとエラー
+	 * @throws IdNullException
 	 */
-	public void update()
+	public void update() throws IdNullException
 	{
-		if(contextParam != null)
-		{
-			updateObj = new UseUpdate(contextParam);
+		int id = 0;
+		id = this.getId();
+		System.out.println("idチェック"+id);
+		//idがセットされていないとこのメソッドは使えない
+		if(id == 0){
+			throw new IdNullException();
 		}
-		else
-		{
-			updateObj = new UseUpdate();
+
+		this.newUpdateObj();
+		this.newSelectObj();
+
+		//更新前の自分の値取得
+		BaseBeans thisBean = this.find(this.getId());
+
+		Field[] fields;
+		Class<? extends BaseBeans> thisClass = this.getClass();
+		fields = thisClass.getDeclaredFields();
+		for(Field field:fields){
+			Method getter = null;
+			Method setter = null;
+			//セッターとゲッター取得
+			getter = this.getGetter(field, thisClass);
+			setter = this.getSetter(field, thisClass);
+			Object ret = null;
+			ret = this.getGetterInvokeValue(this, getter);
+
+			//セッターに値詰めるのはあえてここでやる
+			if(ret != null){
+				try {
+					setter.invoke(thisBean, ret);
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 
 		List<Object> valueList = new ArrayList<Object>();
-		valueList = this.getBeanValueList(this);
+		valueList = this.getBeanValueList(thisBean);
 		List<String> clumNameList = new ArrayList<String>();
 		clumNameList = this.getCulumNameList();
 		String sql = "";
-
-		//SetメソッドをListでも行けるようにする
-		sql =  createSQL.Update("Students", clumNameList).Set(valueList).Where(BaseColumns.id, "=", this.getId()).GenerateAlltoString();
-		System.out.println(sql);
+		sql =  createSQL.Update(this.beanClassName, clumNameList).Set(valueList).Where(BaseColumns.id, "=", this.getId()).GenerateAlltoString();
+		System.out.println("baebeasnのupdate:"+sql);
 
 		updateObj.DoUpdate(sql);
 	}
@@ -263,14 +483,7 @@ public class BaseBeans {
 	 */
 	public void insert()
 	{
-		if(contextParam != null)
-		{
-			insertObj = new UseInsert(contextParam);
-		}
-		else
-		{
-			insertObj = new UseInsert();
-		}
+		this.newInsertObj();
 
 		List<Object> valueList = new ArrayList<Object>();
 		valueList = this.getBeanValueList(this);
@@ -280,7 +493,5 @@ public class BaseBeans {
 		sql = createSQL.InsertInto(beanClassName,clumNameList).Values(this.getBeanValueList(this)).GenerateAlltoString();
 		insertObj.DoInsert(sql);
 	}
-
-
 
 }
